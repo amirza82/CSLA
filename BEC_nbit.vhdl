@@ -22,7 +22,8 @@ entity port_bec_nbit is
 generic (n:integer);
 port (
     B : in std_logic_vector(n-1 downto 0);
-    X : out std_logic_vector(n-1 downto 0)
+    X : out std_logic_vector(n-1 downto 0);
+    C : out std_logic
 );
 end port_bec_nbit;
 
@@ -45,6 +46,22 @@ begin
     end generate;
     X(n-1)<=bit_transfer(n-2) xor B(n-1);
 
+    process (B)
+        variable all_one : boolean;
+    begin
+        all_one := true;
+        for i in 0 to n-1 loop
+            if B(i) = '0' then
+                all_one := false;
+                exit;
+            end if;
+        end loop;
+        if all_one then
+            C <= '1';
+        else
+            C <= '0';
+        end if;
+    end process;
 end bec_nbit;
 
 library IEEE;
@@ -60,7 +77,8 @@ end tb_port_bec_nbit;
                 n : integer := 4              );
             port (
                 B : in std_logic_vector(n-1 downto 0);
-                X : out std_logic_vector(n-1 downto 0)
+                X : out std_logic_vector(n-1 downto 0);
+                C : out std_logic
             );
         end component;
 
@@ -68,6 +86,7 @@ end tb_port_bec_nbit;
         constant N_BITS : integer := 4;
         signal B_tb : std_logic_vector(N_BITS-1 downto 0);
         signal X_tb : std_logic_vector(N_BITS-1 downto 0);
+        signal C_tb : std_logic;
 
     begin
         uut: port_bec_nbit
@@ -76,7 +95,8 @@ end tb_port_bec_nbit;
         )
         port map (
             B => B_tb,
-            X => X_tb
+            X => X_tb,
+            C => C_tb
         );
 
         stim_proc: process
